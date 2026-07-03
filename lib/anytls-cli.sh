@@ -24,7 +24,7 @@ Options:
   --custom-rule-set VALUE
                     Rule name such as openai, or tag=...,url=...,outbound=...,format=...
   --dns-strategy VALUE
-                    DNS strategy for direct outbound. Default: ipv4_only.
+                    DNS strategy for direct outbound. Default: prefer_ipv4.
                     Use system to keep sing-box defaults.
   --apply-swap      Create recommended swap when swap is absent.
   --no-swap         Only write the swap recommendation and one-key apply script.
@@ -43,7 +43,7 @@ Environment:
   ANYTLS_RULE_PROFILE      safe, none. Default: safe.
   ANYTLS_CUSTOM_RULE_SETS  Comma list of extra geosite/rule_set names, e.g. openai,netflix.
   ANYTLS_DNS_STRATEGY      ipv4_only, prefer_ipv4, prefer_ipv6, ipv6_only, or system.
-                           Default: ipv4_only.
+                           Default: prefer_ipv4.
   ANYTLS_ENABLE_SWAP       yes, no, ask. Default: ask.
   ANYTLS_SWAP_SIZE_MIB     Swap size when applying swap.
   ANYTLS_ROOT              Test/fakeroot prefix. Normal installs leave this empty.

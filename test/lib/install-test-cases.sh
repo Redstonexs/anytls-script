@@ -50,7 +50,7 @@ run_happy() {
   assert_contains "$config" '"http/1.1"'
   assert_contains "$config" '"dns": {'
   assert_contains "$config" '"type": "local"'
-  assert_contains "$config" '"strategy": "ipv4_only"'
+  assert_contains "$config" '"strategy": "prefer_ipv4"'
   assert_contains "$config" '"domain_resolver": {'
   assert_contains "$config" '"default_domain_resolver": "local"'
   assert_contains "$config" '"geoip-cn"'

@@ -37,7 +37,7 @@ curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/insta
 - 使用 root 权限执行，推荐命令里已经使用 `sudo bash`。
 - 防火墙和云厂商安全组放行 AnyTLS 端口，默认 TCP `443`。
 - 服务默认绑定 `0.0.0.0`，保证使用 A 记录的域名和 IPv4 客户端可连；如需只监听 IPv6，可传 `--listen ::` 或设置 `ANYTLS_LISTEN=::`。
-- 服务端直连出站默认使用 `ipv4_only` DNS 策略，避免 VPS IPv6 出站不可用时访问外站失败；如需系统默认解析，可传 `--dns-strategy system`。
+- 服务端直连出站默认使用 `prefer_ipv4` DNS 策略，恢复 IPv6 出站可用性，同时优先尝试 IPv4；如需系统默认解析，可传 `--dns-strategy system`。
 - 默认按 fscarmen/sing-box 导出 `chrome` TLS fingerprint，ALPN 仍默认不写；如需禁用默认 fingerprint，可用 `ANYTLS_FINGERPRINT=` 运行安装器。
 - DNS 已把 `--domain` 指向当前 VPS。
 - acme.sh standalone 签发期间需要 TCP `80` 可被公网访问，且没有其他程序占用。
@@ -100,7 +100,7 @@ curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/insta
 - 写入 BBR 和常用 TCP 调优配置。
 - 检测内存和 swap；未启用 swap 时给出建议，并生成一键应用脚本。
 - 默认安全规则：阻断 CN 方向出站规则集和 BitTorrent。
-- 默认服务端 direct 出站使用 `ipv4_only` 解析策略，可通过 `--dns-strategy` 调整。
+- 默认服务端 direct 出站使用 `prefer_ipv4` 解析策略，可通过 `--dns-strategy` 调整。
 - AnyTLS 服务端 inbound 按 fscarmen/sing-box 的形态写入 `padding_scheme: []`。
 - 默认导出的 v2RayN 链接使用 `v2rayn://anytls/<base64url-json>`，并在 JSON 中写入 `ConfigType:11`、`CoreType:24`、`StreamSecurity:"tls"`、`Sni`、`Fingerprint` 和证书内容。
 - 支持自定义 geosite/rule_set 规则。
