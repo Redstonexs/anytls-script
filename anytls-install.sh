@@ -12,6 +12,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "$SCRIPT_DIR/lib/anytls-config.sh"
 . "$SCRIPT_DIR/lib/anytls-service.sh"
 . "$SCRIPT_DIR/lib/anytls-swap-export.sh"
+. "$SCRIPT_DIR/lib/anytls-uninstall.sh"
 . "$SCRIPT_DIR/lib/anytls-install-binary.sh"
 . "$SCRIPT_DIR/lib/anytls-main.sh"
 

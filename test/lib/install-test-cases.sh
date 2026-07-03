@@ -201,6 +201,68 @@ EOF
   printf 'PASS happy\n'
 }
 
+run_uninstall_cases() {
+  local fake out
+  fake="$(make_fake_root)"
+  out="$fake/output.txt"
+
+  bash "$SCRIPT" \
+    --root "$fake" \
+    --yes \
+    --domain "uninstall.example" \
+    --password "test-password" \
+    --self-signed \
+    --apply-swap \
+    --rules none \
+    --no-color >"$out" 2>&1
+
+  assert_file "$fake/etc/sing-box/config.json"
+  assert_file "$fake/etc/systemd/system/sing-box-anytls.service"
+  assert_file "$fake/etc/sysctl.d/99-anytls-tuning.conf"
+  assert_file "$fake/etc/anytls/server.crt"
+  assert_file "$fake/etc/anytls/server.key"
+  assert_file "$fake/etc/anytls/password"
+  assert_file "$fake/etc/anytls/exports/share-link.txt"
+  assert_file "$fake/etc/anytls/swap-plan.env"
+  assert_file "$fake/etc/anytls/swap-apply-plan.sh"
+
+  bash "$SCRIPT" \
+    --root "$fake" \
+    --yes \
+    --uninstall \
+    --no-color >"$out" 2>&1
+
+  assert_not_path "$fake/etc/sing-box/config.json"
+  assert_not_path "$fake/etc/sing-box"
+  assert_not_path "$fake/etc/systemd/system/sing-box-anytls.service"
+  assert_not_path "$fake/etc/init.d/sing-box-anytls"
+  assert_not_path "$fake/etc/sysctl.d/99-anytls-tuning.conf"
+  assert_not_path "$fake/etc/anytls/exports"
+  assert_not_path "$fake/etc/anytls/swap-plan.env"
+  assert_not_path "$fake/etc/anytls/swap-apply-plan.sh"
+  assert_file "$fake/etc/anytls/server.crt"
+  assert_file "$fake/etc/anytls/server.key"
+  assert_file "$fake/etc/anytls/password"
+  assert_contains "$out" 'AnyTLS service and generated configuration removed.'
+  assert_contains "$out" 'TLS assets and password state were kept.'
+
+  bash "$SCRIPT" \
+    --root "$fake" \
+    --yes \
+    --uninstall \
+    --purge \
+    --no-color >"$out" 2>&1
+
+  assert_not_path "$fake/etc/anytls/server.crt"
+  assert_not_path "$fake/etc/anytls/server.key"
+  assert_not_path "$fake/etc/anytls/password"
+  assert_not_path "$fake/etc/anytls"
+  assert_contains "$out" 'TLS assets and password state purged.'
+
+  rm -rf "$fake"
+  printf 'PASS uninstall\n'
+}
+
 run_invalid() {
   local fake out status
   fake="$(make_fake_root)"
@@ -308,6 +370,23 @@ run_invalid() {
   rm -rf "$fake"
 
   assert_invalid_alpn_rejected
+
+  fake="$(make_fake_root)"
+  out="$fake/output.txt"
+  set +e
+  bash "$SCRIPT" \
+    --root "$fake" \
+    --yes \
+    --purge \
+    --no-color >"$out" 2>&1
+  status=$?
+  set -e
+
+  [ "$status" -ne 0 ] || fail "--purge without --uninstall should fail"
+  assert_contains "$out" "--purge requires --uninstall."
+  assert_not_file "$fake/etc/sing-box/config.json"
+
+  rm -rf "$fake"
 
   fake="$(make_fake_root)"
   out="$fake/output.txt"

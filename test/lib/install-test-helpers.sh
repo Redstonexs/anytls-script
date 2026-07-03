@@ -11,10 +11,14 @@ assert_not_file() {
   [ ! -f "$1" ] || fail "unexpected file: $1"
 }
 
+assert_not_path() {
+  [ ! -e "$1" ] && [ ! -L "$1" ] || fail "unexpected path: $1"
+}
+
 assert_contains() {
   local file="$1"
   local needle="$2"
-  grep -Fq "$needle" "$file" || {
+  grep -Fq -- "$needle" "$file" || {
     printf -- '--- %s ---\n' "$file" >&2
     sed -n '1,220p' "$file" >&2 || true
     fail "expected '$needle' in $file"
@@ -35,7 +39,7 @@ assert_json_valid() {
 assert_not_contains() {
   local file="$1"
   local needle="$2"
-  if grep -Fq "$needle" "$file"; then
+  if grep -Fq -- "$needle" "$file"; then
     fail "did not expect '$needle' in $file"
   fi
 }
@@ -53,7 +57,7 @@ assert_occurrences() {
   local needle="$2"
   local expected="$3"
   local actual
-  actual="$(grep -Fo "$needle" "$file" | wc -l | tr -d ' ')"
+  actual="$(grep -Fo -- "$needle" "$file" | wc -l | tr -d ' ')"
   [ "$actual" = "$expected" ] || fail "expected $expected occurrence(s) of '$needle' in $file, got $actual"
 }
 

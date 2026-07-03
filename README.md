@@ -240,6 +240,40 @@ sudo rc-service sing-box-anytls status
 sudo rc-service sing-box-anytls restart
 ```
 
+## 卸载
+
+保留证书、私钥和连接密码，只移除服务和脚本生成的配置：
+
+```bash
+sudo bash /opt/anytls-script/anytls-install.sh --yes --uninstall
+```
+
+同时删除 `/etc/anytls/server.crt`、`/etc/anytls/server.key` 和 `/etc/anytls/password`：
+
+```bash
+sudo bash /opt/anytls-script/anytls-install.sh --yes --uninstall --purge
+```
+
+管道方式也可以触发卸载：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --uninstall
+```
+
+热卸载方案适合远端服务异常、仓库还没有更新或 `/opt/anytls-script` 不可用时使用。它只停止 AnyTLS 服务并移除本脚本写入的服务、sing-box 配置、导出文件和调优文件，不卸载 `sing-box` 软件包，不删除证书、私钥、密码、acme.sh 和 swap：
+
+```bash
+sudo systemctl disable --now sing-box-anytls.service 2>/dev/null || true
+sudo rc-service sing-box-anytls stop 2>/dev/null || true
+sudo rc-update del sing-box-anytls default 2>/dev/null || true
+sudo rm -f /etc/systemd/system/sing-box-anytls.service /etc/init.d/sing-box-anytls
+sudo rm -f /etc/sing-box/config.json /etc/sysctl.d/99-anytls-tuning.conf
+sudo rm -rf /etc/anytls/exports
+sudo rm -f /etc/anytls/swap-plan.env /etc/anytls/swap-apply-plan.sh
+sudo systemctl daemon-reload 2>/dev/null || true
+sudo systemctl reset-failed sing-box-anytls.service 2>/dev/null || true
+```
+
 ## 手动保留方案
 
 正常情况下不需要手动安装 sing-box，也不需要手动 clone 仓库。下面只作为网络受限、自动安装失败或需要审计脚本时的保留方案。

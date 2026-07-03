@@ -43,6 +43,8 @@ Common AnyTLS options passed through:
   --port PORT                   AnyTLS port. Default: 443.
   --listen ADDRESS              AnyTLS bind address. Default: 0.0.0.0.
   --fingerprint FP              TLS client fingerprint for share links. Default: chrome.
+  --uninstall                   Stop and remove the AnyTLS service/configuration.
+  --purge                       With --uninstall, remove TLS assets and password too.
   --self-signed                 Explicitly use a self-signed certificate.
   --apply-swap                  Apply recommended swap when the host has none.
   --rules safe|none|block-cn,block-bt
@@ -153,6 +155,9 @@ install_base_dependencies() {
 
 install_sing_box() {
   local manager="$1"
+  if has_uninstall_flag; then
+    return
+  fi
   if command -v sing-box >/dev/null 2>&1; then
     ok "sing-box already installed: $(command -v sing-box)"
     return
@@ -214,6 +219,16 @@ has_non_interactive_flag() {
         return 0
         ;;
     esac
+  done
+  return 1
+}
+
+has_uninstall_flag() {
+  local arg
+  for arg in "${INSTALLER_ARGS[@]}"; do
+    if [ "$arg" = "--uninstall" ]; then
+      return 0
+    fi
   done
   return 1
 }

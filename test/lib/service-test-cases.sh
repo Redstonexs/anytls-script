@@ -17,11 +17,15 @@ EOF
   DRY_RUN=0
 
   apply_service
+  uninstall_service
+  reload_service_manager_after_uninstall
 
   PATH="$old_path"
   assert_contains "$log" "daemon-reload"
   assert_contains "$log" "enable sing-box-anytls.service"
   assert_contains "$log" "restart sing-box-anytls.service"
+  assert_contains "$log" "disable --now sing-box-anytls.service"
+  assert_contains "$log" "reset-failed sing-box-anytls.service"
   assert_not_contains "$log" "enable --now sing-box-anytls.service"
 
   rm -rf "$fake_bin"

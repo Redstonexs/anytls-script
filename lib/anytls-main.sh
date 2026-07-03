@@ -135,6 +135,13 @@ run_install() {
 
 main() {
   parse_args "$@"
+  if [ "$PURGE" -eq 1 ] && [ "$UNINSTALL" -ne 1 ]; then
+    die "--purge requires --uninstall."
+  fi
   set_colors
+  if [ "$UNINSTALL" -eq 1 ]; then
+    run_uninstall
+    return
+  fi
   run_install
 }

@@ -7,6 +7,8 @@ Usage:
 
 Options:
   --dry-run          Show the guided installation plan without writing files.
+  --uninstall       Stop and remove the AnyTLS service/configuration.
+  --purge           With --uninstall, also remove TLS assets and password state.
   --yes             Non-interactive install using defaults or environment values.
   --non-interactive Alias of --yes.
   --root PATH       Install below PATH. Intended for tests and image builds.
@@ -58,6 +60,12 @@ parse_args() {
     case "$1" in
       --dry-run)
         DRY_RUN=1
+        ;;
+      --uninstall)
+        UNINSTALL=1
+        ;;
+      --purge)
+        PURGE=1
         ;;
       --yes|-y)
         ASSUME_YES=1
