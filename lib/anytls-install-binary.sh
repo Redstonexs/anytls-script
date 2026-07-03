@@ -30,7 +30,8 @@ apply_service() {
   fi
   if command -v systemctl >/dev/null 2>&1; then
     systemctl daemon-reload
-    systemctl enable --now sing-box-anytls.service
+    systemctl enable sing-box-anytls.service
+    systemctl restart sing-box-anytls.service
   elif command -v rc-update >/dev/null 2>&1 && command -v rc-service >/dev/null 2>&1; then
     rc-update add sing-box-anytls default
     rc-service sing-box-anytls restart
