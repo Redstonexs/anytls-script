@@ -7,11 +7,13 @@ assert_export_artifacts() {
   assert_file "$exports/sing-box-client.json"
   assert_file "$exports/clash-verge.yaml"
   assert_file "$exports/v2rayn-share.txt"
+  assert_file "$exports/v2rayn-insecure-share.txt"
   assert_file "$exports/subscription.txt"
   assert_json_valid "$exports/sing-box-client.json"
   assert_mode "$exports/share-link.txt" 600
   assert_mode "$exports/anytls-uri.txt" 600
   assert_mode "$exports/sing-box-client.json" 600
+  assert_mode "$exports/v2rayn-insecure-share.txt" 600
   assert_mode "$exports/subscription.txt" 600
 
   assert_contains "$exports/share-link.txt" 'anytls://test%20pass%40word%2F1%09quoted%22slash%5C@203.0.113.10:9443'
@@ -20,6 +22,9 @@ assert_export_artifacts() {
   assert_contains "$exports/anytls-uri.txt" 'alpn=h2%2Chttp%2F1.1'
   assert_contains "$exports/v2rayn-share.txt" 'alpn=h2%2Chttp%2F1.1'
   assert_contains "$exports/v2rayn-share.txt" 'fp=chrome'
+  assert_not_contains "$exports/v2rayn-share.txt" 'insecure=1'
+  assert_contains "$exports/v2rayn-insecure-share.txt" 'insecure=1'
+  assert_contains "$exports/v2rayn-insecure-share.txt" 'allowInsecure=1'
   assert_contains "$exports/sing-box-client.json" '"type": "anytls"'
   assert_contains "$exports/sing-box-client.json" '"alpn": ['
   assert_contains "$exports/sing-box-client.json" '"h2"'
@@ -30,6 +35,7 @@ assert_export_artifacts() {
   assert_not_contains "$exports/clash-verge.yaml" '"http/1.1"proxy-groups:'
   assert_contains "$exports/v2rayn-share.txt" 'anytls://'
   assert_contains "$exports/subscription.txt" 'anytls://'
+  assert_contains "$exports/subscription.txt" "v2rayn-insecure: ${root}/etc/anytls/exports/v2rayn-insecure-share.txt"
   assert_contains "$exports/subscription.txt" "sing-box-client: ${root}/etc/anytls/exports/sing-box-client.json"
 }
 

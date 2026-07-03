@@ -171,6 +171,7 @@ sudo ls -l /etc/anytls/exports
 
 - `share-link.txt`：通用 `anytls://` 分享链接。
 - `v2rayn-share.txt`：给 v2RayN 导入的分享链接，默认包含 `fp=chrome` 和 `alpn=h2,http/1.1`。
+- `v2rayn-insecure-share.txt`：给 v2RayN 诊断证书校验问题的兼容链接，会跳过证书验证；确认问题后应优先修客户端信任链。
 - `clash-verge.yaml`：给 Clash Verge Rev 使用的 YAML。
 - `sing-box-client.json`：sing-box 客户端 outbound 示例。
 - `subscription.txt`：包含分享链接和客户端 JSON 路径。

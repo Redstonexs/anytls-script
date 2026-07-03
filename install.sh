@@ -174,12 +174,25 @@ install_sing_box() {
   ok "sing-box installed: $(command -v sing-box)"
 }
 
+recover_installer_mode_change() {
+  local status numstat
+  status="$(git -C "$INSTALL_DIR" status --short --untracked-files=no)"
+  [ "$status" = " M anytls-install.sh" ] || return 0
+
+  numstat="$(git -C "$INSTALL_DIR" diff --numstat -- anytls-install.sh)"
+  [ "$numstat" = "0	0	anytls-install.sh" ] || return 0
+
+  log "Resetting installer-managed executable bit change before updating the repository."
+  git -C "$INSTALL_DIR" checkout -- anytls-install.sh
+}
+
 deploy_repo() {
   log "Installing repository ${REPO_URL} (${REPO_BRANCH}) to ${INSTALL_DIR}."
 
   if [ -d "$INSTALL_DIR/.git" ]; then
     git -C "$INSTALL_DIR" fetch origin "$REPO_BRANCH"
     git -C "$INSTALL_DIR" checkout "$REPO_BRANCH"
+    recover_installer_mode_change
     git -C "$INSTALL_DIR" pull --ff-only origin "$REPO_BRANCH"
     return
   fi
