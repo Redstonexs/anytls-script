@@ -108,6 +108,10 @@ state_dir() {
   root_path /etc/anytls
 }
 
+password_file() {
+  root_path /etc/anytls/password
+}
+
 ensure_parent() {
   mkdir -p "$(dirname "$1")"
 }

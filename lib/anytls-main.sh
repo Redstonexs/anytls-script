@@ -69,15 +69,36 @@ Rules and exports
 EOF
 }
 
+ensure_password() {
+  local existing
+  if [ -n "$PASSWORD" ]; then
+    return
+  fi
+
+  if [ -f "$(password_file)" ]; then
+    existing="$(cat "$(password_file)")"
+    if [ -n "$existing" ]; then
+      PASSWORD="$existing"
+      return
+    fi
+    warn "$(password_file) is empty; generating a new AnyTLS password."
+  fi
+
+  if existing="$(read_existing_config_password)"; then
+    PASSWORD="$existing"
+    return
+  fi
+
+  PASSWORD="$(random_password)"
+}
+
 run_install() {
   validate_inputs
   detect_os
   detect_pkg_manager
   detect_public_host
   validate_certificate_host
-  if [ -z "$PASSWORD" ]; then
-    PASSWORD="$(random_password)"
-  fi
+  ensure_password
 
   print_intro
 
@@ -95,6 +116,7 @@ run_install() {
   apply_sysctl
   write_tls_assets
   write_sing_box_config
+  write_password_state
   write_service
   write_swap_plan
   export_profiles

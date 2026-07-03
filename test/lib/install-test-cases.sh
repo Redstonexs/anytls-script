@@ -130,6 +130,34 @@ PY
 
   fake="$(make_fake_root)"
   out="$fake/output.txt"
+  bash "$SCRIPT" \
+    --root "$fake" \
+    --yes \
+    --domain "reuse.example" \
+    --self-signed \
+    --rules none \
+    --no-color >"$out" 2>&1
+
+  local first_link second_link
+  first_link="$(cat "$fake/etc/anytls/exports/share-link.txt")"
+  assert_file "$fake/etc/anytls/password"
+  assert_mode "$fake/etc/anytls/password" 600
+
+  bash "$SCRIPT" \
+    --root "$fake" \
+    --yes \
+    --domain "reuse.example" \
+    --self-signed \
+    --rules none \
+    --no-color >"$out" 2>&1
+
+  second_link="$(cat "$fake/etc/anytls/exports/share-link.txt")"
+  [ "$first_link" = "$second_link" ] || fail "reinstall without --password should reuse the existing generated password"
+
+  rm -rf "$fake"
+
+  fake="$(make_fake_root)"
+  out="$fake/output.txt"
   cat > "$fake/etc/os-release" <<'EOF'
 ID=alpine
 ID_LIKE=alpine

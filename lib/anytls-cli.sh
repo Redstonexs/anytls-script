@@ -33,7 +33,7 @@ Environment:
   ANYTLS_SERVER_HOST       Public server DNS name for ACME certificates and exports.
   ANYTLS_PORT              AnyTLS listen port. Default: 443.
   ANYTLS_LISTEN            AnyTLS bind address. Default: 0.0.0.0.
-  ANYTLS_PASSWORD          User password. Auto-generated if empty.
+  ANYTLS_PASSWORD          User password. Reuse existing or auto-generate if empty.
   ANYTLS_ALPN              Optional comma-separated TLS ALPN list. Default: h2,http/1.1.
   ANYTLS_FINGERPRINT       Optional TLS client fingerprint for share links. Default: chrome.
   ANYTLS_ACME_SERVER       ACME CA server alias. Default: letsencrypt.

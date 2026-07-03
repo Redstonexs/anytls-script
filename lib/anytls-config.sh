@@ -241,3 +241,26 @@ $(route_rule_sets_json)
 }
 EOF
 }
+
+read_existing_config_password() {
+  local config value
+  config="$(config_dir)/config.json"
+  [ -f "$config" ] || return 1
+
+  value="$(awk '
+    /"users"[[:space:]]*:/ { in_users = 1 }
+    in_users && /"password"[[:space:]]*:/ {
+      line = $0
+      sub(/^[^:]*:[[:space:]]*"/, "", line)
+      sub(/",?[[:space:]]*$/, "", line)
+      print line
+      exit
+    }
+  ' "$config")"
+  [ -n "$value" ] || return 1
+  json_unescape_simple "$value"
+}
+
+write_password_state() {
+  printf '%s' "$PASSWORD" | write_secret_file "$(password_file)"
+}

@@ -44,6 +44,19 @@ random_password() {
   fi
 }
 
+json_unescape_simple() {
+  local value="$1"
+  value="${value//\\\"/\"}"
+  value="${value//\\\\/\\}"
+  value="${value//\\\//\/}"
+  value="${value//\\b/$'\b'}"
+  value="${value//\\f/$'\f'}"
+  value="${value//\\n/$'\n'}"
+  value="${value//\\r/$'\r'}"
+  value="${value//\\t/$'\t'}"
+  printf '%s' "$value"
+}
+
 json_escape() {
   local value="$1"
   local escaped=""

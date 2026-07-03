@@ -107,6 +107,7 @@ curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/insta
 - Alpine OpenRC 服务：`/etc/init.d/sing-box-anytls`
 - BBR/TCP 调优：`/etc/sysctl.d/99-anytls-tuning.conf`
 - TLS 证书和私钥：`/etc/anytls/server.crt`、`/etc/anytls/server.key`
+- AnyTLS 连接密码状态：`/etc/anytls/password`
 - acme.sh：默认安装在 `/root/.acme.sh`，证书续签和安装路径由 acme.sh 维护。
 - swap 建议：`/etc/anytls/swap-plan.env`
 - swap 一键脚本：`/etc/anytls/swap-apply-plan.sh`
@@ -294,6 +295,7 @@ sudo bash anytls-install.sh --dry-run --domain your-domain.example --no-color
 - 导出的分享链接包含连接密码，请不要公开发布。
 - 如果 VPS 已有 swap，脚本不会创建新的 swap。
 - `install.sh` 默认会自动追加 `--yes`。需要交互确认时传 `--interactive`。
+- 不传 `--password` 时，脚本会优先复用 `/etc/anytls/password` 或现有 sing-box 配置中的密码；首次安装才会自动生成新密码。
 - 默认 ALPN 是 `h2,http/1.1`，默认 fingerprint 是 `chrome`；可通过 `--alpn` 和 `--fingerprint` 覆盖。
 - 默认监听地址是 `0.0.0.0`，避免域名只有 A 记录时服务端意外只接受 IPv6 连接；IPv6-only 场景请显式设置 `--listen ::`。
 
