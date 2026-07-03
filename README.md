@@ -1,10 +1,83 @@
 # anytls-script
 
-一个面向 VPS 的 AnyTLS 安装脚本，基于 sing-box 生成 AnyTLS 服务端配置，并提供 BBR/TCP 调优、swap 建议、一键规则配置和客户端导入文件导出。
+一个面向 VPS 的 AnyTLS 自动安装脚本，基于 sing-box 生成 AnyTLS 服务端配置，并提供 BBR/TCP 调优、swap 建议、一键规则配置和客户端导入文件导出。
+
+## 推荐安装方式
+
+在 VPS 上执行一条命令即可。脚本会自动完成这些前置工作：
+
+- 安装基础依赖：`curl`、`git`、`openssl`、`iproute2` 等。
+- 安装或复用 `sing-box`。
+- 拉取本仓库到 `/opt/anytls-script`。
+- 运行 `anytls-install.sh` 完成 AnyTLS 服务端安装。
+
+建议使用已解析到 VPS 的域名：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --port 8443
+```
+
+如果没有域名，也可以先用 VPS 公网 IP：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain 203.0.113.10 --port 8443
+```
+
+如果希望在系统没有 swap 时自动应用推荐 swap：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --port 8443 --apply-swap
+```
+
+不传 `--domain` 时，安装器会尝试自动取本机第一个 IP，但生产环境更建议显式传入域名或公网 IP。
+
+## 安装前需要确认
+
+- VPS 是 Linux 系统，建议使用 Debian/Ubuntu、RHEL/Fedora/CentOS 系、openSUSE、Arch/Manjaro 或 Alpine。
+- 使用 root 权限执行，推荐命令里已经使用 `sudo bash`。
+- 防火墙和云厂商安全组放行 AnyTLS 端口，默认 TCP `8443`。
+- 如果使用域名，先确认 DNS 已解析到 VPS。
+
+## 自动安装参数
+
+`install.sh` 是 bootstrap 脚本，负责前置工作。它会把大多数参数原样传给 `anytls-install.sh`。
+
+常用命令：
+
+```bash
+# 默认安全规则，非交互安装
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example
+
+# 指定端口和密码
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --port 9443 --password 'your-strong-password'
+
+# 关闭内置阻断规则
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --rules none
+
+# 添加自定义 geosite 规则
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --custom-rule-set openai
+```
+
+bootstrap 专用参数：
+
+```text
+--bootstrap-install-dir PATH  仓库安装目录，默认 /opt/anytls-script
+--bootstrap-repo URL          仓库地址
+--bootstrap-branch NAME       分支，默认 main
+--skip-sing-box-install       不自动安装 sing-box
+--interactive                 不自动追加 --yes，改用交互确认
+```
+
+例如安装到自定义目录：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --bootstrap-install-dir /opt/my-anytls --domain your-domain.example
+```
 
 ## 功能
 
 - 适配常见 Linux 发行版：Debian/Ubuntu、RHEL/Fedora/CentOS 系、openSUSE、Arch/Manjaro、Alpine。
+- 默认通过管道命令全自动安装。
 - 交互式安装引导，也支持 `--yes` 非交互安装。
 - 写入 BBR 和常用 TCP 调优配置。
 - 检测内存和 swap；未启用 swap 时给出建议，并生成一键应用脚本。
@@ -12,102 +85,9 @@
 - 支持自定义 geosite/rule_set 规则。
 - 导出 AnyTLS 分享链接、v2RayN 分享文本、Clash Verge YAML 和 sing-box 客户端 JSON。
 
-## 安装前准备
+## 安装后文件
 
-VPS 需要：
-
-- 一台 Linux VPS，建议使用 root 用户执行。
-- 一个已解析到 VPS 的域名，或者直接使用 VPS 公网 IP。
-- 防火墙和云厂商安全组放行安装端口，默认是 TCP `8443`。
-- 已安装 `sing-box`。本脚本不会盲目下载二进制文件；正式安装前会检查系统里是否已有 `sing-box`。
-
-### 安装 sing-box
-
-Debian/Ubuntu：
-
-```bash
-sudo mkdir -p /etc/apt/keyrings
-sudo curl -fsSL https://sing-box.app/gpg.key -o /etc/apt/keyrings/sagernet.asc
-sudo chmod a+r /etc/apt/keyrings/sagernet.asc
-cat <<'EOF' | sudo tee /etc/apt/sources.list.d/sagernet.sources
-Types: deb
-URIs: https://deb.sagernet.org/
-Suites: *
-Components: *
-Enabled: yes
-Signed-By: /etc/apt/keyrings/sagernet.asc
-EOF
-sudo apt-get update
-sudo apt-get install -y sing-box
-```
-
-Fedora/RHEL 系：
-
-```bash
-sudo dnf config-manager addrepo --from-repofile=https://sing-box.app/sing-box.repo
-sudo dnf install -y sing-box
-```
-
-其他 Linux 可以使用 sing-box 官方安装脚本，执行前请自行确认来源：
-
-```bash
-curl -fsSL https://sing-box.app/install.sh | sudo sh
-```
-
-Alpine 可优先尝试：
-
-```bash
-sudo apk add sing-box
-```
-
-确认安装：
-
-```bash
-sing-box version
-```
-
-## 在 VPS 上安装 AnyTLS
-
-拉取仓库：
-
-```bash
-git clone https://github.com/Redstonexs/anytls-script.git
-cd anytls-script
-```
-
-先查看将要写入的内容，不做任何系统修改：
-
-```bash
-sudo bash anytls-install.sh --dry-run --domain your-domain.example --port 8443 --no-color
-```
-
-正式安装：
-
-```bash
-sudo bash anytls-install.sh --domain your-domain.example --port 8443
-```
-
-如果你想完全非交互安装，并在系统没有 swap 时自动应用推荐 swap：
-
-```bash
-sudo bash anytls-install.sh \
-  --yes \
-  --domain your-domain.example \
-  --port 8443 \
-  --apply-swap
-```
-
-如果你只想生成 swap 建议和一键脚本，不立即启用 swap：
-
-```bash
-sudo bash anytls-install.sh \
-  --domain your-domain.example \
-  --port 8443 \
-  --no-swap
-```
-
-安装后主要文件：
-
+- 仓库目录：`/opt/anytls-script`
 - 服务端配置：`/etc/sing-box/config.json`
 - systemd 服务：`/etc/systemd/system/sing-box-anytls.service`
 - Alpine OpenRC 服务：`/etc/init.d/sing-box-anytls`
@@ -122,7 +102,7 @@ sudo bash anytls-install.sh \
 默认规则等同于：
 
 ```bash
-sudo bash anytls-install.sh --domain your-domain.example --rules safe
+sudo bash /opt/anytls-script/anytls-install.sh --yes --domain your-domain.example --rules safe
 ```
 
 `safe` 会阻断：
@@ -135,33 +115,25 @@ sudo bash anytls-install.sh --domain your-domain.example --rules safe
 只阻断 CN：
 
 ```bash
-sudo bash anytls-install.sh --domain your-domain.example --rules block-cn
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --rules block-cn
 ```
 
 只阻断 BitTorrent：
 
 ```bash
-sudo bash anytls-install.sh --domain your-domain.example --rules block-bt
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --rules block-bt
 ```
 
 不启用内置阻断规则：
 
 ```bash
-sudo bash anytls-install.sh --domain your-domain.example --rules none
-```
-
-添加常见 geosite 规则，例如阻断 OpenAI：
-
-```bash
-sudo bash anytls-install.sh \
-  --domain your-domain.example \
-  --custom-rule-set openai
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --rules none
 ```
 
 添加完整自定义 rule_set：
 
 ```bash
-sudo bash anytls-install.sh \
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- \
   --domain your-domain.example \
   --custom-rule-set tag=geosite-netflix,url=https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-netflix.srs,outbound=block,format=binary
 ```
@@ -212,35 +184,70 @@ sudo rc-service sing-box-anytls status
 sudo rc-service sing-box-anytls restart
 ```
 
-## 常用参数
+## 手动保留方案
 
-```text
---dry-run          只显示安装计划，不写入文件
---yes             使用默认值/传入值进行非交互安装
---domain HOST     客户端连接使用的域名或公网 IP
---port PORT       AnyTLS 监听端口，默认 8443
---password VALUE  指定 AnyTLS 密码；不填则自动生成
---alpn LIST       可选 ALPN，例如 h2,http/1.1
---rules LIST      block-cn、block-bt、safe、none
---custom-rule-set 自定义 geosite/rule_set
---apply-swap      无 swap 时按建议创建并启用 swap
---no-swap         只写 swap 建议，不立即启用
---export-dir PATH 自定义导出目录
-```
+正常情况下不需要手动安装 sing-box，也不需要手动 clone 仓库。下面只作为网络受限、自动安装失败或需要审计脚本时的保留方案。
 
-查看完整帮助：
+### 手动安装 sing-box
+
+Debian/Ubuntu：
 
 ```bash
-bash anytls-install.sh --help
+sudo mkdir -p /etc/apt/keyrings
+sudo curl -fsSL https://sing-box.app/gpg.key -o /etc/apt/keyrings/sagernet.asc
+sudo chmod a+r /etc/apt/keyrings/sagernet.asc
+cat <<'EOF' | sudo tee /etc/apt/sources.list.d/sagernet.sources
+Types: deb
+URIs: https://deb.sagernet.org/
+Suites: *
+Components: *
+Enabled: yes
+Signed-By: /etc/apt/keyrings/sagernet.asc
+EOF
+sudo apt-get update
+sudo apt-get install -y sing-box
+```
+
+Fedora/RHEL 系：
+
+```bash
+sudo dnf config-manager addrepo --from-repofile=https://sing-box.app/sing-box.repo
+sudo dnf install -y sing-box
+```
+
+其他 Linux 可以使用 sing-box 官方安装脚本，执行前请自行确认来源：
+
+```bash
+curl -fsSL https://sing-box.app/install.sh | sudo sh
+```
+
+确认安装：
+
+```bash
+sing-box version
+```
+
+### 手动拉取仓库并安装
+
+```bash
+git clone https://github.com/Redstonexs/anytls-script.git
+cd anytls-script
+sudo bash anytls-install.sh --domain your-domain.example --port 8443
+```
+
+只查看计划，不写入系统：
+
+```bash
+sudo bash anytls-install.sh --dry-run --domain your-domain.example --port 8443 --no-color
 ```
 
 ## 注意事项
 
-- 请先用 `--dry-run` 检查计划，确认域名、端口和规则符合预期。
+- 管道安装前可以先在浏览器打开 `install.sh` 查看内容。
 - 生产环境建议使用自己的真实证书；脚本默认会在缺少证书时生成自签证书。
 - 导出的分享链接包含连接密码，请不要公开发布。
 - 如果 VPS 已有 swap，脚本不会创建新的 swap。
-- 如果系统没有 `sing-box`，正式安装会停止并提示先安装。
+- `install.sh` 默认会自动追加 `--yes`。需要交互确认时传 `--interactive`。
 
 ## 参考
 
