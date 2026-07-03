@@ -6,7 +6,7 @@ assert_valid_scoped_ipv6_listen() {
   ANYTLS_LISTEN='fe80::1%eth0' bash "$SCRIPT" \
     --root "$fake" \
     --yes \
-    --domain "203.0.113.10" \
+    --domain "listen.example" \
     --password "test-password" \
     --port "9443" \
     --rules none \

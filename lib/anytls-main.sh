@@ -12,15 +12,24 @@ This guided installer will:
   2. Enable BBR and conservative TCP connection tuning.
   3. Check swap and offer a one-key swap plan when the host has none.
   4. Configure safe outbound rules: reject CN geoip/geosite and BitTorrent.
-  5. Export sing-box, Clash Verge, and v2RayN import artifacts.
+  5. Issue or reuse TLS assets.
+  6. Export sing-box, Clash Verge, and v2RayN import artifacts.
 EOF
 }
 
 print_dry_run_plan() {
-  local mem_mib swap_mib recommend_mib
+  local mem_mib swap_mib recommend_mib tls_detail
   mem_mib="$(memory_total_mib)"
   swap_mib="$(swap_total_mib)"
   recommend_mib="$(recommended_swap_mib "$mem_mib")"
+  if tls_assets_exist; then
+    tls_detail="  Existing certificate/key: yes; installer will reuse them."
+  elif [ "$TLS_MODE" = "acme" ]; then
+    tls_detail="  ACME server: ${ACME_SERVER}
+  ACME note: ${SERVER_HOST} must resolve to this VPS and TCP port 80 must be free during issuance."
+  else
+    tls_detail="  Self-signed: explicitly requested; ACME issuance will not be attempted."
+  fi
 
   cat <<EOF
 
@@ -35,8 +44,10 @@ BBR and connection tuning
   Enable: net.ipv4.tcp_congestion_control=bbr, net.core.default_qdisc=fq
 
 TLS assets
+  Mode: ${TLS_MODE}
   Certificate: ${TLS_CERT_PATH}
   Private key: ${TLS_KEY_PATH}
+${tls_detail}
 
 Swap advisory
   Memory: ${mem_mib} MiB
@@ -61,6 +72,7 @@ run_install() {
   detect_os
   detect_pkg_manager
   detect_public_host
+  validate_certificate_host
   if [ -z "$PASSWORD" ]; then
     PASSWORD="$(random_password)"
   fi

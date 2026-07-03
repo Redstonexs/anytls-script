@@ -30,7 +30,7 @@ detect_os() {
 
 detect_pkg_manager() {
   PKG_MANAGER="manual"
-  INSTALL_CMD="Install curl, tar, gzip, openssl, ca-certificates, systemd/openrc, and iproute2 with your distribution package manager."
+  INSTALL_CMD="Install curl, tar, gzip, openssl, ca-certificates, socat, systemd/openrc, and iproute2 with your distribution package manager."
 
   if [ -n "$PKG_MANAGER_OVERRIDE" ]; then
     PKG_MANAGER="$PKG_MANAGER_OVERRIDE"
@@ -62,22 +62,22 @@ detect_pkg_manager() {
 
   case "$PKG_MANAGER" in
     apt)
-    INSTALL_CMD="apt-get update && apt-get install -y curl tar gzip openssl ca-certificates systemd iproute2"
+    INSTALL_CMD="apt-get update && apt-get install -y curl tar gzip openssl ca-certificates socat systemd iproute2"
       ;;
     dnf)
-    INSTALL_CMD="dnf install -y curl tar gzip openssl ca-certificates systemd iproute"
+    INSTALL_CMD="dnf install -y curl tar gzip openssl ca-certificates socat systemd iproute"
       ;;
     yum)
-    INSTALL_CMD="yum install -y curl tar gzip openssl ca-certificates systemd iproute"
+    INSTALL_CMD="yum install -y curl tar gzip openssl ca-certificates socat systemd iproute"
       ;;
     zypper)
-    INSTALL_CMD="zypper --non-interactive install curl tar gzip openssl ca-certificates systemd iproute2"
+    INSTALL_CMD="zypper --non-interactive install curl tar gzip openssl ca-certificates socat systemd iproute2"
       ;;
     pacman)
-    INSTALL_CMD="pacman -Sy --noconfirm curl tar gzip openssl ca-certificates systemd iproute2"
+    INSTALL_CMD="pacman -Sy --noconfirm curl tar gzip openssl ca-certificates socat systemd iproute2"
       ;;
     apk)
-    INSTALL_CMD="apk add --no-cache curl tar gzip openssl ca-certificates openrc iproute2"
+    INSTALL_CMD="apk add --no-cache curl tar gzip openssl ca-certificates socat openrc iproute2"
       ;;
     manual)
       ;;

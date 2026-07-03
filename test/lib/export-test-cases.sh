@@ -44,6 +44,7 @@ assert_ipv6_share_uri() {
     --domain "2001:db8::1" \
     --password "test-password" \
     --port "9443" \
+    --self-signed \
     --rules none \
     --no-color >"$out" 2>&1
 

@@ -10,13 +10,15 @@ Options:
   --yes             Non-interactive install using defaults or environment values.
   --non-interactive Alias of --yes.
   --root PATH       Install below PATH. Intended for tests and image builds.
-  --domain HOST     Public server host or IP for exported profiles.
+  --domain HOST     Public server DNS name for ACME certificates and exports.
   --port PORT       AnyTLS listen port. Default: 443.
   --password VALUE  AnyTLS user password.
   --alpn LIST       Optional comma-separated TLS ALPN list, e.g. h2,http/1.1.
   --fingerprint FP  Optional TLS client fingerprint for share links. Default: chrome.
   --cert-file PATH  TLS certificate path. Default: /etc/anytls/server.crt.
   --key-file PATH   TLS private key path. Default: /etc/anytls/server.key.
+  --acme            Use acme.sh for certificate issuance and renewal. Default.
+  --self-signed     Explicitly create a self-signed certificate instead of ACME.
   --rules LIST      Comma list: block-cn,block-bt,none.
   --custom-rule-set VALUE
                     Rule name such as openai, or tag=...,url=...,outbound=...,format=...
@@ -27,11 +29,12 @@ Options:
   --help            Show this help text.
 
 Environment:
-  ANYTLS_SERVER_HOST       Public server host or IP for exported profiles.
+  ANYTLS_SERVER_HOST       Public server DNS name for ACME certificates and exports.
   ANYTLS_PORT              AnyTLS listen port. Default: 443.
   ANYTLS_PASSWORD          User password. Auto-generated if empty.
   ANYTLS_ALPN              Optional comma-separated TLS ALPN list. Default: h2,http/1.1.
   ANYTLS_FINGERPRINT       Optional TLS client fingerprint for share links. Default: chrome.
+  ANYTLS_ACME_SERVER       ACME CA server alias. Default: letsencrypt.
   ANYTLS_RULE_PROFILE      safe, none. Default: safe.
   ANYTLS_CUSTOM_RULE_SETS  Comma list of extra geosite/rule_set names, e.g. openai,netflix.
   ANYTLS_ENABLE_SWAP       yes, no, ask. Default: ask.
@@ -94,6 +97,12 @@ parse_args() {
         [ "$#" -ge 2 ] || die "--key-file requires a path."
         TLS_KEY_PATH="$2"
         shift
+        ;;
+      --acme)
+        TLS_MODE="acme"
+        ;;
+      --self-signed)
+        TLS_MODE="self-signed"
         ;;
       --rules)
         [ "$#" -ge 2 ] || die "--rules requires a comma list."

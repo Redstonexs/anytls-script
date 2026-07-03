@@ -88,6 +88,7 @@ PY
     --yes \
     --domain "203.0.113.10" \
     --password "test-password" \
+    --self-signed \
     --rules none \
     --no-color >"$out" 2>&1
 
@@ -105,7 +106,7 @@ PY
   bash "$SCRIPT" \
     --root "$fake" \
     --yes \
-    --domain "203.0.113.10" \
+    --domain "rules.example" \
     --password "test-password" \
     --port "9443" \
     --rules none \
@@ -120,6 +121,7 @@ PY
   assert_contains "$config" '"geosite-openai"'
   assert_contains "$fake/etc/anytls/swap-plan.env" 'ACTION=recommended'
   assert_contains "$fake/etc/anytls/swap-apply-plan.sh" 'fallocate -l 1024M'
+  assert_contains "$out" 'Fake-root: would issue and install an ACME certificate with acme.sh.'
   assert_contains "$out" 'Swap not changed.'
   assert_contains "$out" 'AnyTLS install files are ready.'
 
@@ -135,7 +137,7 @@ EOF
   bash "$SCRIPT" \
     --root "$fake" \
     --yes \
-    --domain "203.0.113.10" \
+    --domain "alpine.example" \
     --password "test-password" \
     --port "9443" \
     --no-color >"$out" 2>&1
@@ -255,5 +257,21 @@ run_invalid() {
   assert_not_file "$fake/etc/sing-box/config.json"
 
   rm -rf "$fake"
+
+  out="$(mktemp "${TMPDIR:-/tmp}/anytls-invalid-acme.XXXXXX")"
+  set +e
+  bash "$SCRIPT" \
+    --dry-run \
+    --yes \
+    --domain "203.0.113.10" \
+    --password "test-password" \
+    --no-color >"$out" 2>&1
+  status=$?
+  set -e
+
+  [ "$status" -ne 0 ] || fail "ACME mode with an IP address should fail"
+  assert_contains "$out" "ACME certificate mode requires a DNS name"
+  rm -f "$out"
+
   printf 'PASS invalid\n'
 }

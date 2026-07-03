@@ -39,9 +39,10 @@ Bootstrap options:
   --help                        Show this help.
 
 Common AnyTLS options passed through:
-  --domain HOST                 Public server domain or IP.
+  --domain HOST                 Public server DNS name for ACME certificates.
   --port PORT                   AnyTLS port. Default: 443.
   --fingerprint FP              TLS client fingerprint for share links. Default: chrome.
+  --self-signed                 Explicitly use a self-signed certificate.
   --apply-swap                  Apply recommended swap when the host has none.
   --rules safe|none|block-cn,block-bt
   --custom-rule-set openai
@@ -122,25 +123,25 @@ install_base_dependencies() {
   case "$manager" in
     apt)
       apt-get update
-      DEBIAN_FRONTEND=noninteractive apt-get install -y curl ca-certificates tar gzip openssl iproute2 git
+      DEBIAN_FRONTEND=noninteractive apt-get install -y curl ca-certificates tar gzip openssl socat iproute2 git
       ;;
     dnf)
-      dnf install -y curl ca-certificates tar gzip openssl iproute git
+      dnf install -y curl ca-certificates tar gzip openssl socat iproute git
       ;;
     yum)
-      yum install -y curl ca-certificates tar gzip openssl iproute git
+      yum install -y curl ca-certificates tar gzip openssl socat iproute git
       ;;
     zypper)
-      zypper --non-interactive install curl ca-certificates tar gzip openssl iproute2 git
+      zypper --non-interactive install curl ca-certificates tar gzip openssl socat iproute2 git
       ;;
     pacman)
-      pacman -Sy --noconfirm curl ca-certificates tar gzip openssl iproute2 git
+      pacman -Sy --noconfirm curl ca-certificates tar gzip openssl socat iproute2 git
       ;;
     apk)
-      apk add --no-cache curl ca-certificates tar gzip openssl iproute2 git openrc
+      apk add --no-cache curl ca-certificates tar gzip openssl socat iproute2 git openrc
       ;;
     manual)
-      log "No supported package manager found; assuming curl, git, tar, gzip, openssl, and iproute2 are already installed."
+      log "No supported package manager found; assuming curl, git, tar, gzip, openssl, socat, and iproute2 are already installed."
       ;;
     *)
       die "Unsupported package manager: ${manager}"

@@ -63,6 +63,73 @@ validate_fingerprint() {
   esac
 }
 
+is_acme_domain_name() {
+  local host="$1"
+  case "$host" in
+    ''|YOUR_SERVER_IP|*:*|*[!A-Za-z0-9.-]*|.*|*.|*..*)
+      return 1
+      ;;
+  esac
+  case "$host" in
+    *.*)
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+  case "$host" in
+    *[!0-9.]*)
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  local old_ifs label
+  old_ifs="$IFS"
+  IFS=.
+  for label in $host; do
+    case "$label" in
+      ''|-*|*-)
+        IFS="$old_ifs"
+        return 1
+        ;;
+    esac
+    if [ "${#label}" -gt 63 ]; then
+      IFS="$old_ifs"
+      return 1
+    fi
+  done
+  IFS="$old_ifs"
+  return 0
+}
+
+tls_assets_exist() {
+  [ -f "$(root_path "$TLS_CERT_PATH")" ] && [ -f "$(root_path "$TLS_KEY_PATH")" ]
+}
+
+validate_tls_mode() {
+  case "$TLS_MODE" in
+    acme|self-signed)
+      ;;
+    *)
+      die "TLS mode must be 'acme' or 'self-signed'."
+      ;;
+  esac
+}
+
+validate_certificate_host() {
+  if [ "$TLS_MODE" != "acme" ]; then
+    return
+  fi
+  if tls_assets_exist; then
+    return
+  fi
+  if ! is_acme_domain_name "$SERVER_HOST"; then
+    die "ACME certificate mode requires a DNS name that resolves to this VPS. Pass --domain your-domain.example, provide existing --cert-file/--key-file files, or explicitly use --self-signed for IP/testing installs."
+  fi
+}
+
 parse_custom_rule_spec() {
   local spec="$1"
   CUSTOM_TAG=""
@@ -196,6 +263,7 @@ validate_custom_rule_records() {
 }
 
 validate_inputs() {
+  validate_tls_mode
   validate_port
   if [ -n "$SERVER_HOST" ]; then
     validate_host "$SERVER_HOST"
