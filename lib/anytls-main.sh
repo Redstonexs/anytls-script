@@ -49,8 +49,9 @@ Rules and exports
   Built-in blocks: geoip-cn, geosite-geolocation-cn, geosite-bittorrent, protocol=bittorrent
   Custom rule sets: ${CUSTOM_RULE_SETS:-none}
   ALPN: ${ALPN:-none}
+  Fingerprint: ${TLS_FINGERPRINT:-none}
   Export directory: $(exports_dir)
-  v2RayN/share URI: anytls://<password>@${SERVER_HOST}:${SERVER_PORT}?security=tls&sni=${SERVER_HOST}
+  v2RayN/share URI: anytls://<password>@${SERVER_HOST}:${SERVER_PORT}?security=tls&sni=${SERVER_HOST}$(fingerprint_query_param)$(alpn_query_param)
   Clash Verge Rev: direct anytls:// URI import; sing-box-client.json is also exported
 EOF
 }

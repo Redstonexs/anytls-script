@@ -52,6 +52,17 @@ validate_url() {
   esac
 }
 
+validate_fingerprint() {
+  if [ -z "$TLS_FINGERPRINT" ]; then
+    return
+  fi
+  case "$TLS_FINGERPRINT" in
+    *[!A-Za-z0-9._+-]*)
+      die "ANYTLS_FINGERPRINT may contain only letters, digits, '.', '_', '+', or '-'."
+      ;;
+  esac
+}
+
 parse_custom_rule_spec() {
   local spec="$1"
   CUSTOM_TAG=""
@@ -191,6 +202,7 @@ validate_inputs() {
   fi
   validate_listen_address "$LISTEN_ADDRESS"
   validate_alpn
+  validate_fingerprint
   case "$INSTALL_RULE_PROFILE" in
     safe|none)
       ;;

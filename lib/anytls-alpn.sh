@@ -28,6 +28,11 @@ alpn_query_param() {
   printf '&alpn=%s' "$(url_encode "$ALPN")"
 }
 
+fingerprint_query_param() {
+  [ -n "$TLS_FINGERPRINT" ] || return 0
+  printf '&fp=%s' "$(url_encode "$TLS_FINGERPRINT")"
+}
+
 tls_alpn_json() {
   [ -n "$ALPN" ] || return 0
 

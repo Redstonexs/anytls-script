@@ -16,7 +16,10 @@ assert_export_artifacts() {
 
   assert_contains "$exports/share-link.txt" 'anytls://test%20pass%40word%2F1%09quoted%22slash%5C@203.0.113.10:9443'
   assert_contains "$exports/share-link.txt" 'alpn=h2%2Chttp%2F1.1'
+  assert_contains "$exports/share-link.txt" 'fp=chrome'
   assert_contains "$exports/anytls-uri.txt" 'alpn=h2%2Chttp%2F1.1'
+  assert_contains "$exports/v2rayn-share.txt" 'alpn=h2%2Chttp%2F1.1'
+  assert_contains "$exports/v2rayn-share.txt" 'fp=chrome'
   assert_contains "$exports/sing-box-client.json" '"type": "anytls"'
   assert_contains "$exports/sing-box-client.json" '"alpn": ['
   assert_contains "$exports/sing-box-client.json" '"h2"'
@@ -47,6 +50,8 @@ assert_ipv6_share_uri() {
   exports="$fake/etc/anytls/exports"
   assert_file "$exports/share-link.txt"
   assert_contains "$exports/share-link.txt" 'anytls://test-password@[2001:db8::1]:9443'
+  assert_contains "$exports/share-link.txt" 'alpn=h2%2Chttp%2F1.1'
+  assert_contains "$exports/share-link.txt" 'fp=chrome'
   assert_contains "$exports/share-link.txt" 'sni=2001%3Adb8%3A%3A1'
   assert_contains "$exports/subscription.txt" "sing-box-client: ${fake}/etc/anytls/exports/sing-box-client.json"
 

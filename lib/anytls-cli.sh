@@ -14,6 +14,7 @@ Options:
   --port PORT       AnyTLS listen port. Default: 443.
   --password VALUE  AnyTLS user password.
   --alpn LIST       Optional comma-separated TLS ALPN list, e.g. h2,http/1.1.
+  --fingerprint FP  Optional TLS client fingerprint for share links. Default: chrome.
   --cert-file PATH  TLS certificate path. Default: /etc/anytls/server.crt.
   --key-file PATH   TLS private key path. Default: /etc/anytls/server.key.
   --rules LIST      Comma list: block-cn,block-bt,none.
@@ -29,7 +30,8 @@ Environment:
   ANYTLS_SERVER_HOST       Public server host or IP for exported profiles.
   ANYTLS_PORT              AnyTLS listen port. Default: 443.
   ANYTLS_PASSWORD          User password. Auto-generated if empty.
-  ANYTLS_ALPN              Optional comma-separated TLS ALPN list.
+  ANYTLS_ALPN              Optional comma-separated TLS ALPN list. Default: h2,http/1.1.
+  ANYTLS_FINGERPRINT       Optional TLS client fingerprint for share links. Default: chrome.
   ANYTLS_RULE_PROFILE      safe, none. Default: safe.
   ANYTLS_CUSTOM_RULE_SETS  Comma list of extra geosite/rule_set names, e.g. openai,netflix.
   ANYTLS_ENABLE_SWAP       yes, no, ask. Default: ask.
@@ -76,6 +78,11 @@ parse_args() {
       --alpn)
         [ "$#" -ge 2 ] || die "--alpn requires a comma list."
         ALPN="$2"
+        shift
+        ;;
+      --fingerprint)
+        [ "$#" -ge 2 ] || die "--fingerprint requires a value."
+        TLS_FINGERPRINT="$2"
         shift
         ;;
       --cert-file)

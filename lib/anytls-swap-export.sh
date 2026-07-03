@@ -11,7 +11,7 @@ export_profiles() {
   host_escaped="$(json_escape "$SERVER_HOST")"
   name_escaped="$(json_escape "$SERVER_NAME")"
   password_escaped="$(json_escape "$PASSWORD")"
-  link="anytls://${password_encoded}@${host_authority}:${SERVER_PORT}?security=tls&sni=${host_encoded}$(alpn_query_param)#${name_encoded}"
+  link="anytls://${password_encoded}@${host_authority}:${SERVER_PORT}?security=tls&sni=${host_encoded}$(fingerprint_query_param)$(alpn_query_param)#${name_encoded}"
 
   write_secret_file "$exports/share-link.txt" <<EOF
 ${link}

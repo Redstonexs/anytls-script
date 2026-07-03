@@ -15,7 +15,7 @@ assert_contains() {
   local file="$1"
   local needle="$2"
   grep -Fq "$needle" "$file" || {
-    printf '--- %s ---\n' "$file" >&2
+    printf -- '--- %s ---\n' "$file" >&2
     sed -n '1,220p' "$file" >&2 || true
     fail "expected '$needle' in $file"
   }

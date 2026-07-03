@@ -51,6 +51,9 @@ curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/insta
 # 指定端口和密码
 curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --port 9443 --password 'your-strong-password'
 
+# 指定 v2RayN 导入时使用的 TLS fingerprint 和 ALPN
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --fingerprint chrome --alpn h2,http/1.1
+
 # 关闭内置阻断规则
 curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --rules none
 
@@ -84,6 +87,7 @@ curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/insta
 - 默认安全规则：阻断 CN 方向出站规则集和 BitTorrent。
 - 支持自定义 geosite/rule_set 规则。
 - 导出 AnyTLS 分享链接、v2RayN 分享文本、Clash Verge YAML 和 sing-box 客户端 JSON。
+- v2RayN 分享链接默认带 `fp=chrome` 和 `alpn=h2,http/1.1`，导入后会自动填写 Fingerprint 和 ALPN。
 
 ## 安装后文件
 
@@ -154,7 +158,7 @@ sudo ls -l /etc/anytls/exports
 常用文件：
 
 - `share-link.txt`：通用 `anytls://` 分享链接。
-- `v2rayn-share.txt`：给 v2RayN 导入的分享链接。
+- `v2rayn-share.txt`：给 v2RayN 导入的分享链接，默认包含 `fp=chrome` 和 `alpn=h2,http/1.1`。
 - `clash-verge.yaml`：给 Clash Verge Rev 使用的 YAML。
 - `sing-box-client.json`：sing-box 客户端 outbound 示例。
 - `subscription.txt`：包含分享链接和客户端 JSON 路径。
@@ -248,6 +252,7 @@ sudo bash anytls-install.sh --dry-run --domain your-domain.example --no-color
 - 导出的分享链接包含连接密码，请不要公开发布。
 - 如果 VPS 已有 swap，脚本不会创建新的 swap。
 - `install.sh` 默认会自动追加 `--yes`。需要交互确认时传 `--interactive`。
+- 默认 ALPN 是 `h2,http/1.1`，默认 fingerprint 是 `chrome`；可通过 `--alpn` 和 `--fingerprint` 覆盖。
 
 ## 参考
 

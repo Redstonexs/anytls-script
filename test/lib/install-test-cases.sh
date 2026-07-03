@@ -236,5 +236,24 @@ run_invalid() {
   rm -rf "$fake"
 
   assert_invalid_alpn_rejected
+
+  fake="$(make_fake_root)"
+  out="$fake/output.txt"
+  set +e
+  bash "$SCRIPT" \
+    --root "$fake" \
+    --yes \
+    --domain "203.0.113.10" \
+    --password "test-password" \
+    --fingerprint $'bad"fp' \
+    --no-color >"$out" 2>&1
+  status=$?
+  set -e
+
+  [ "$status" -ne 0 ] || fail "invalid fingerprint should fail"
+  assert_contains "$out" "ANYTLS_FINGERPRINT may contain only"
+  assert_not_file "$fake/etc/sing-box/config.json"
+
+  rm -rf "$fake"
   printf 'PASS invalid\n'
 }
