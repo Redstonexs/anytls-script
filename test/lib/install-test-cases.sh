@@ -42,6 +42,7 @@ run_happy() {
   assert_default_ipv4_listen "$config"
   assert_contains "$config" '"listen_port": 9443'
   assert_contains "$config" '"password": "test pass@word/1\tquoted\"slash\\"'
+  assert_contains "$config" '"padding_scheme": []'
   assert_contains "$config" '"certificate_path": "/etc/anytls/server.crt"'
   assert_contains "$config" '"key_path": "/etc/anytls/server.key"'
   assert_contains "$config" '"alpn": ['
@@ -82,11 +83,15 @@ PY
   assert_contains "$fake/etc/anytls/swap-plan.env" 'ACTION=recommended'
   assert_contains "$fake/etc/anytls/swap-apply-plan.sh" 'fallocate -l 1024M'
   assert_contains "$out" 'AnyTLS install files are ready.'
+  assert_contains "$out" 'v2RayN import:'
 
   rm -rf "$fake"
 
   assert_valid_scoped_ipv6_listen
   assert_ipv6_share_uri
+  assert_valid_certificate_exports
+  assert_combined_pem_does_not_export_private_key
+  assert_empty_fingerprint_override
 
   fake="$(make_fake_root)"
   out="$fake/output.txt"
@@ -111,11 +116,10 @@ PY
   assert_not_contains "$config" '"alpn": ['
   assert_contains "$exports/share-link.txt" 'anytls://test-password@203.0.113.10:443'
   assert_not_contains "$exports/share-link.txt" 'alpn='
-  assert_not_contains "$exports/share-link.txt" 'fp='
-  assert_contains "$exports/v2rayn-share.txt" 'type=tcp'
-  assert_contains "$exports/v2rayn-share.txt" 'headerType=none'
-  assert_contains "$exports/v2rayn-share.txt" 'insecure=0'
-  assert_contains "$exports/v2rayn-share.txt" 'allowInsecure=0'
+  assert_contains "$exports/share-link.txt" 'fp=chrome'
+  assert_v2rayn_anytls_profile "$exports/v2rayn-share.txt" false "203.0.113.10" 443 "test-password" chrome
+  assert_not_contains "$exports/v2rayn-share.txt" 'type=tcp'
+  assert_not_contains "$exports/v2rayn-share.txt" 'headerType=none'
 
   rm -rf "$fake"
 
@@ -142,6 +146,7 @@ PY
   assert_contains "$out" 'Fake-root: would issue and install an ACME certificate with acme.sh.'
   assert_contains "$out" 'Swap not changed.'
   assert_contains "$out" 'AnyTLS install files are ready.'
+  assert_contains "$out" 'v2RayN import:'
 
   rm -rf "$fake"
 

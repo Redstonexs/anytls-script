@@ -42,7 +42,7 @@ Common AnyTLS options passed through:
   --domain HOST                 Public server DNS name for ACME certificates.
   --port PORT                   AnyTLS port. Default: 443.
   --listen ADDRESS              AnyTLS bind address. Default: 0.0.0.0.
-  --fingerprint FP              TLS client fingerprint for share links.
+  --fingerprint FP              TLS client fingerprint for share links. Default: chrome.
   --self-signed                 Explicitly use a self-signed certificate.
   --apply-swap                  Apply recommended swap when the host has none.
   --rules safe|none|block-cn,block-bt

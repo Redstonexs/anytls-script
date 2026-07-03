@@ -15,7 +15,7 @@ Options:
   --listen ADDRESS  AnyTLS bind address. Default: 0.0.0.0.
   --password VALUE  AnyTLS user password.
   --alpn LIST       Optional comma-separated TLS ALPN list, e.g. h2,http/1.1.
-  --fingerprint FP  Optional TLS client fingerprint for share links.
+  --fingerprint FP  TLS client fingerprint for share links. Default: chrome.
   --cert-file PATH  TLS certificate path. Default: /etc/anytls/server.crt.
   --key-file PATH   TLS private key path. Default: /etc/anytls/server.key.
   --acme            Use acme.sh for certificate issuance and renewal. Default.
@@ -38,7 +38,7 @@ Environment:
   ANYTLS_LISTEN            AnyTLS bind address. Default: 0.0.0.0.
   ANYTLS_PASSWORD          User password. Reuse existing or auto-generate if empty.
   ANYTLS_ALPN              Optional comma-separated TLS ALPN list. Default: empty.
-  ANYTLS_FINGERPRINT       Optional TLS client fingerprint for share links. Default: empty.
+  ANYTLS_FINGERPRINT       TLS client fingerprint for share links. Default: chrome.
   ANYTLS_ACME_SERVER       ACME CA server alias. Default: letsencrypt.
   ANYTLS_RULE_PROFILE      safe, none. Default: safe.
   ANYTLS_CUSTOM_RULE_SETS  Comma list of extra geosite/rule_set names, e.g. openai,netflix.

@@ -223,11 +223,10 @@ route_rule_sets_json() {
 }
 
 write_sing_box_config() {
-  local listen_escaped name_escaped password_escaped host_escaped cert_escaped key_escaped
+  local listen_escaped name_escaped password_escaped cert_escaped key_escaped
   listen_escaped="$(json_escape "$LISTEN_ADDRESS")"
   name_escaped="$(json_escape "$SERVER_NAME")"
   password_escaped="$(json_escape "$PASSWORD")"
-  host_escaped="$(json_escape "$SERVER_HOST")"
   cert_escaped="$(json_escape "$TLS_CERT_PATH")"
   key_escaped="$(json_escape "$TLS_KEY_PATH")"
 
@@ -250,9 +249,9 @@ $(dns_config_json)
           "password": "${password_escaped}"
         }
       ],
+      "padding_scheme": [],
       "tls": {
         "enabled": true,
-        "server_name": "${host_escaped}",
         "certificate_path": "${cert_escaped}",
         "key_path": "${key_escaped}"$(tls_alpn_json)
       }

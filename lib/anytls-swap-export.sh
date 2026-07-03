@@ -1,3 +1,65 @@
+v2rayn_anytls_json() {
+  local allow_insecure="$1"
+  local host_escaped name_escaped password_escaped fingerprint_json cert_json cert_value
+  host_escaped="$(json_escape "$SERVER_HOST")"
+  name_escaped="$(json_escape "$SERVER_NAME")"
+  password_escaped="$(json_escape "$PASSWORD")"
+  fingerprint_json=""
+  cert_json=""
+
+  if [ -n "$TLS_FINGERPRINT" ]; then
+    fingerprint_json=",\"Fingerprint\":\"$(json_escape "$TLS_FINGERPRINT")\""
+  fi
+  cert_value="$(certificate_pem_json_value)"
+  if [ -n "$cert_value" ]; then
+    cert_json=",\"Cert\":\"${cert_value}\""
+  fi
+
+  printf '{"ConfigType":11,"CoreType":24,"ConfigVersion":4,"Remarks":"%s","Address":"%s","Port":%s,"Password":"%s","StreamSecurity":"tls","AllowInsecure":"%s","Sni":"%s"%s%s}' \
+    "$name_escaped" \
+    "$host_escaped" \
+    "$SERVER_PORT" \
+    "$password_escaped" \
+    "$allow_insecure" \
+    "$host_escaped" \
+    "$fingerprint_json" \
+    "$cert_json"
+}
+
+v2rayn_anytls_link() {
+  local allow_insecure="$1"
+  printf 'v2rayn://anytls/%s' "$(v2rayn_anytls_json "$allow_insecure" | base64_url_encode)"
+}
+
+sing_box_client_cert_pin_json() {
+  local public_key
+  public_key="$(certificate_public_key_sha256_base64)"
+  [ -n "$public_key" ] || return 0
+  printf '        "certificate_public_key_sha256": [\n'
+  printf '          "%s"\n' "$(json_escape "$public_key")"
+  printf '        ],\n'
+}
+
+sing_box_client_utls_json() {
+  [ -n "$TLS_FINGERPRINT" ] || return 0
+  printf ',\n        "utls": {\n'
+  printf '          "enabled": true,\n'
+  printf '          "fingerprint": "%s"\n' "$(json_escape "$TLS_FINGERPRINT")"
+  printf '        }'
+}
+
+clash_cert_fingerprint_yaml() {
+  local fingerprint
+  fingerprint="$(certificate_sha256_fingerprint)"
+  [ -n "$fingerprint" ] || return 0
+  printf '    fingerprint: "%s"\n' "$fingerprint"
+}
+
+clash_client_fingerprint_yaml() {
+  [ -n "$TLS_FINGERPRINT" ] || return 0
+  printf '    client-fingerprint: "%s"\n' "$(json_escape "$TLS_FINGERPRINT")"
+}
+
 export_profiles() {
   local exports
   exports="$(exports_dir)"
@@ -11,9 +73,9 @@ export_profiles() {
   host_escaped="$(json_escape "$SERVER_HOST")"
   name_escaped="$(json_escape "$SERVER_NAME")"
   password_escaped="$(json_escape "$PASSWORD")"
-  link="anytls://${password_encoded}@${host_authority}:${SERVER_PORT}?security=tls&sni=${host_encoded}$(fingerprint_query_param)$(alpn_query_param)#${name_encoded}"
-  v2rayn_link="anytls://${password_encoded}@${host_authority}:${SERVER_PORT}?security=tls&sni=${host_encoded}$(fingerprint_query_param)$(alpn_query_param)&type=tcp&headerType=none&insecure=0&allowInsecure=0#${name_encoded}"
-  v2rayn_insecure_link="anytls://${password_encoded}@${host_authority}:${SERVER_PORT}?security=tls&sni=${host_encoded}$(fingerprint_query_param)$(alpn_query_param)&type=tcp&headerType=none&insecure=1&allowInsecure=1#${name_encoded}"
+  link="anytls://${password_encoded}@${host_authority}:${SERVER_PORT}?idle_session_check_interval=30s&idle_session_timeout=30s&min_idle_session=5&insecure=0&security=tls&sni=${host_encoded}$(certificate_pem_query_param)$(fingerprint_query_param)$(alpn_query_param)#${name_encoded}"
+  v2rayn_link="$(v2rayn_anytls_link false)"
+  v2rayn_insecure_link="$(v2rayn_anytls_link true)"
 
   write_secret_file "$exports/share-link.txt" <<EOF
 ${link}
@@ -32,9 +94,12 @@ EOF
       "server": "${host_escaped}",
       "server_port": ${SERVER_PORT},
       "password": "${password_escaped}",
+      "idle_session_check_interval": "30s",
+      "idle_session_timeout": "30s",
+      "min_idle_session": 5,
       "tls": {
         "enabled": true,
-        "server_name": "${host_escaped}"$(tls_alpn_json)
+$(sing_box_client_cert_pin_json)        "server_name": "${host_escaped}"$(sing_box_client_utls_json)$(tls_alpn_json)
       }
     }
   ]
@@ -48,8 +113,14 @@ proxies:
     server: "${host_escaped}"
     port: ${SERVER_PORT}
     password: "${password_escaped}"
+$(clash_client_fingerprint_yaml)
+    udp: true
+    idle-session-check-interval: 30
+    idle-session-timeout: 30
     tls: true
     sni: "${host_escaped}"
+    skip-cert-verify: false
+$(clash_cert_fingerprint_yaml)
 $(clash_alpn_yaml)
 proxy-groups:
   - name: Proxy
@@ -70,6 +141,7 @@ EOF
 
   write_secret_file "$exports/subscription.txt" <<EOF
 ${link}
+v2rayn: ${exports}/v2rayn-share.txt
 v2rayn-insecure: ${exports}/v2rayn-insecure-share.txt
 sing-box-client: ${exports}/sing-box-client.json
 EOF

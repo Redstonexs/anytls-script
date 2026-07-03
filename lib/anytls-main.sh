@@ -65,8 +65,9 @@ Rules and exports
   ALPN: ${ALPN:-none}
   Fingerprint: ${TLS_FINGERPRINT:-none}
   Export directory: $(exports_dir)
-  v2RayN/share URI: anytls://<password>@${SERVER_HOST}:${SERVER_PORT}?security=tls&sni=${SERVER_HOST}$(fingerprint_query_param)$(alpn_query_param)
-  Clash Verge Rev: direct anytls:// URI import; sing-box-client.json is also exported
+  v2RayN import: $(exports_dir)/v2rayn-share.txt uses v2rayn://anytls/<base64url-json>
+  Generic share URI: anytls://<password>@${SERVER_HOST}:${SERVER_PORT}?idle_session_check_interval=30s&idle_session_timeout=30s&min_idle_session=5&insecure=0&security=tls&sni=${SERVER_HOST}$(fingerprint_query_param)$(alpn_query_param)
+  Clash Verge Rev: clash-verge.yaml; sing-box-client.json is also exported
 EOF
 }
 
@@ -128,6 +129,8 @@ run_install() {
   ok "Exports: $(exports_dir)"
   printf '%s\n' "Share link:"
   cat "$(exports_dir)/share-link.txt"
+  printf '\n%s\n' "v2RayN import:"
+  cat "$(exports_dir)/v2rayn-share.txt"
 }
 
 main() {
