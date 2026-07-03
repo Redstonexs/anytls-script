@@ -14,19 +14,19 @@
 建议使用已解析到 VPS 的域名：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --port 8443
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example
 ```
 
 如果没有域名，也可以先用 VPS 公网 IP：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain 203.0.113.10 --port 8443
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain 203.0.113.10
 ```
 
 如果希望在系统没有 swap 时自动应用推荐 swap：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --port 8443 --apply-swap
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --apply-swap
 ```
 
 不传 `--domain` 时，安装器会尝试自动取本机第一个 IP，但生产环境更建议显式传入域名或公网 IP。
@@ -35,7 +35,7 @@ curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/insta
 
 - VPS 是 Linux 系统，建议使用 Debian/Ubuntu、RHEL/Fedora/CentOS 系、openSUSE、Arch/Manjaro 或 Alpine。
 - 使用 root 权限执行，推荐命令里已经使用 `sudo bash`。
-- 防火墙和云厂商安全组放行 AnyTLS 端口，默认 TCP `8443`。
+- 防火墙和云厂商安全组放行 AnyTLS 端口，默认 TCP `443`。
 - 如果使用域名，先确认 DNS 已解析到 VPS。
 
 ## 自动安装参数
@@ -232,13 +232,13 @@ sing-box version
 ```bash
 git clone https://github.com/Redstonexs/anytls-script.git
 cd anytls-script
-sudo bash anytls-install.sh --domain your-domain.example --port 8443
+sudo bash anytls-install.sh --domain your-domain.example
 ```
 
 只查看计划，不写入系统：
 
 ```bash
-sudo bash anytls-install.sh --dry-run --domain your-domain.example --port 8443 --no-color
+sudo bash anytls-install.sh --dry-run --domain your-domain.example --no-color
 ```
 
 ## 注意事项

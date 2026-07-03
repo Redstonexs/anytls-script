@@ -11,7 +11,7 @@ Options:
   --non-interactive Alias of --yes.
   --root PATH       Install below PATH. Intended for tests and image builds.
   --domain HOST     Public server host or IP for exported profiles.
-  --port PORT       AnyTLS listen port. Default: 8443.
+  --port PORT       AnyTLS listen port. Default: 443.
   --password VALUE  AnyTLS user password.
   --alpn LIST       Optional comma-separated TLS ALPN list, e.g. h2,http/1.1.
   --cert-file PATH  TLS certificate path. Default: /etc/anytls/server.crt.
@@ -27,7 +27,7 @@ Options:
 
 Environment:
   ANYTLS_SERVER_HOST       Public server host or IP for exported profiles.
-  ANYTLS_PORT              AnyTLS listen port. Default: 8443.
+  ANYTLS_PORT              AnyTLS listen port. Default: 443.
   ANYTLS_PASSWORD          User password. Auto-generated if empty.
   ANYTLS_ALPN              Optional comma-separated TLS ALPN list.
   ANYTLS_RULE_PROFILE      safe, none. Default: safe.

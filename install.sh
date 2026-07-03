@@ -40,7 +40,7 @@ Bootstrap options:
 
 Common AnyTLS options passed through:
   --domain HOST                 Public server domain or IP.
-  --port PORT                   AnyTLS port. Default: 8443.
+  --port PORT                   AnyTLS port. Default: 443.
   --apply-swap                  Apply recommended swap when the host has none.
   --rules safe|none|block-cn,block-bt
   --custom-rule-set openai

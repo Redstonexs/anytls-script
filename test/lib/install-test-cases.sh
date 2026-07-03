@@ -88,6 +88,25 @@ PY
     --yes \
     --domain "203.0.113.10" \
     --password "test-password" \
+    --rules none \
+    --no-color >"$out" 2>&1
+
+  config="$fake/etc/sing-box/config.json"
+  exports="$fake/etc/anytls/exports"
+  assert_file "$config"
+  assert_json_valid "$config"
+  assert_contains "$config" '"listen_port": 443'
+  assert_contains "$exports/share-link.txt" 'anytls://test-password@203.0.113.10:443'
+
+  rm -rf "$fake"
+
+  fake="$(make_fake_root)"
+  out="$fake/output.txt"
+  bash "$SCRIPT" \
+    --root "$fake" \
+    --yes \
+    --domain "203.0.113.10" \
+    --password "test-password" \
     --port "9443" \
     --rules none \
     --custom-rule-set openai \
