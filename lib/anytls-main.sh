@@ -57,6 +57,8 @@ Swap advisory
 
 Rules and exports
   Rule profile: ${INSTALL_RULE_PROFILE}
+  Listen address: ${LISTEN_ADDRESS}
+  Listen port: ${SERVER_PORT}
   Built-in blocks: geoip-cn, geosite-geolocation-cn, geosite-bittorrent, protocol=bittorrent
   Custom rule sets: ${CUSTOM_RULE_SETS:-none}
   ALPN: ${ALPN:-none}

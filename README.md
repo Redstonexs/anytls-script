@@ -36,6 +36,7 @@ curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/insta
 - VPS 是 Linux 系统，建议使用 Debian/Ubuntu、RHEL/Fedora/CentOS 系、openSUSE、Arch/Manjaro 或 Alpine。
 - 使用 root 权限执行，推荐命令里已经使用 `sudo bash`。
 - 防火墙和云厂商安全组放行 AnyTLS 端口，默认 TCP `443`。
+- 服务默认绑定 `0.0.0.0`，保证使用 A 记录的域名和 IPv4 客户端可连；如需只监听 IPv6，可传 `--listen ::` 或设置 `ANYTLS_LISTEN=::`。
 - DNS 已把 `--domain` 指向当前 VPS。
 - acme.sh standalone 签发期间需要 TCP `80` 可被公网访问，且没有其他程序占用。
 
@@ -51,6 +52,9 @@ curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/insta
 
 # 指定端口和密码
 curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --port 9443 --password 'your-strong-password'
+
+# 指定监听地址，例如只监听 IPv6
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --listen ::
 
 # 指定 v2RayN 导入时使用的 TLS fingerprint 和 ALPN
 curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --fingerprint chrome --alpn h2,http/1.1
@@ -291,6 +295,7 @@ sudo bash anytls-install.sh --dry-run --domain your-domain.example --no-color
 - 如果 VPS 已有 swap，脚本不会创建新的 swap。
 - `install.sh` 默认会自动追加 `--yes`。需要交互确认时传 `--interactive`。
 - 默认 ALPN 是 `h2,http/1.1`，默认 fingerprint 是 `chrome`；可通过 `--alpn` 和 `--fingerprint` 覆盖。
+- 默认监听地址是 `0.0.0.0`，避免域名只有 A 记录时服务端意外只接受 IPv6 连接；IPv6-only 场景请显式设置 `--listen ::`。
 
 ## 参考
 

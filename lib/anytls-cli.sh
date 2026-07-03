@@ -12,6 +12,7 @@ Options:
   --root PATH       Install below PATH. Intended for tests and image builds.
   --domain HOST     Public server DNS name for ACME certificates and exports.
   --port PORT       AnyTLS listen port. Default: 443.
+  --listen ADDRESS  AnyTLS bind address. Default: 0.0.0.0.
   --password VALUE  AnyTLS user password.
   --alpn LIST       Optional comma-separated TLS ALPN list, e.g. h2,http/1.1.
   --fingerprint FP  Optional TLS client fingerprint for share links. Default: chrome.
@@ -31,6 +32,7 @@ Options:
 Environment:
   ANYTLS_SERVER_HOST       Public server DNS name for ACME certificates and exports.
   ANYTLS_PORT              AnyTLS listen port. Default: 443.
+  ANYTLS_LISTEN            AnyTLS bind address. Default: 0.0.0.0.
   ANYTLS_PASSWORD          User password. Auto-generated if empty.
   ANYTLS_ALPN              Optional comma-separated TLS ALPN list. Default: h2,http/1.1.
   ANYTLS_FINGERPRINT       Optional TLS client fingerprint for share links. Default: chrome.
@@ -71,6 +73,11 @@ parse_args() {
       --port)
         [ "$#" -ge 2 ] || die "--port requires a value."
         SERVER_PORT="$2"
+        shift
+        ;;
+      --listen)
+        [ "$#" -ge 2 ] || die "--listen requires an address."
+        LISTEN_ADDRESS="$2"
         shift
         ;;
       --password)

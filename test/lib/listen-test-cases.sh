@@ -1,3 +1,8 @@
+assert_default_ipv4_listen() {
+  local config="$1"
+  assert_contains "$config" '"listen": "0.0.0.0"'
+}
+
 assert_valid_scoped_ipv6_listen() {
   local fake out config
   fake="$(make_fake_root)"

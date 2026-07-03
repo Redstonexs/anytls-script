@@ -38,6 +38,7 @@ run_happy() {
   assert_mode "$fake/etc/anytls/swap-apply-plan.sh" 700
 
   assert_contains "$config" '"type": "anytls"'
+  assert_default_ipv4_listen "$config"
   assert_contains "$config" '"listen_port": 9443'
   assert_contains "$config" '"password": "test pass@word/1\tquoted\"slash\\"'
   assert_contains "$config" '"certificate_path": "/etc/anytls/server.crt"'
