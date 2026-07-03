@@ -15,7 +15,7 @@ Options:
   --listen ADDRESS  AnyTLS bind address. Default: 0.0.0.0.
   --password VALUE  AnyTLS user password.
   --alpn LIST       Optional comma-separated TLS ALPN list, e.g. h2,http/1.1.
-  --fingerprint FP  Optional TLS client fingerprint for share links. Default: chrome.
+  --fingerprint FP  Optional TLS client fingerprint for share links.
   --cert-file PATH  TLS certificate path. Default: /etc/anytls/server.crt.
   --key-file PATH   TLS private key path. Default: /etc/anytls/server.key.
   --acme            Use acme.sh for certificate issuance and renewal. Default.
@@ -23,6 +23,9 @@ Options:
   --rules LIST      Comma list: block-cn,block-bt,none.
   --custom-rule-set VALUE
                     Rule name such as openai, or tag=...,url=...,outbound=...,format=...
+  --dns-strategy VALUE
+                    DNS strategy for direct outbound. Default: ipv4_only.
+                    Use system to keep sing-box defaults.
   --apply-swap      Create recommended swap when swap is absent.
   --no-swap         Only write the swap recommendation and one-key apply script.
   --export-dir PATH Export artifact directory. Default: /etc/anytls/exports.
@@ -34,11 +37,13 @@ Environment:
   ANYTLS_PORT              AnyTLS listen port. Default: 443.
   ANYTLS_LISTEN            AnyTLS bind address. Default: 0.0.0.0.
   ANYTLS_PASSWORD          User password. Reuse existing or auto-generate if empty.
-  ANYTLS_ALPN              Optional comma-separated TLS ALPN list. Default: h2,http/1.1.
-  ANYTLS_FINGERPRINT       Optional TLS client fingerprint for share links. Default: chrome.
+  ANYTLS_ALPN              Optional comma-separated TLS ALPN list. Default: empty.
+  ANYTLS_FINGERPRINT       Optional TLS client fingerprint for share links. Default: empty.
   ANYTLS_ACME_SERVER       ACME CA server alias. Default: letsencrypt.
   ANYTLS_RULE_PROFILE      safe, none. Default: safe.
   ANYTLS_CUSTOM_RULE_SETS  Comma list of extra geosite/rule_set names, e.g. openai,netflix.
+  ANYTLS_DNS_STRATEGY      ipv4_only, prefer_ipv4, prefer_ipv6, ipv6_only, or system.
+                           Default: ipv4_only.
   ANYTLS_ENABLE_SWAP       yes, no, ask. Default: ask.
   ANYTLS_SWAP_SIZE_MIB     Swap size when applying swap.
   ANYTLS_ROOT              Test/fakeroot prefix. Normal installs leave this empty.
@@ -123,6 +128,11 @@ parse_args() {
         else
           CUSTOM_RULE_SETS="$2"
         fi
+        shift
+        ;;
+      --dns-strategy)
+        [ "$#" -ge 2 ] || die "--dns-strategy requires a value."
+        DNS_STRATEGY="$2"
         shift
         ;;
       --apply-swap)

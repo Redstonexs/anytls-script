@@ -23,8 +23,14 @@ assert_export_artifacts() {
   assert_contains "$exports/v2rayn-share.txt" 'alpn=h2%2Chttp%2F1.1'
   assert_contains "$exports/v2rayn-share.txt" 'fp=chrome'
   assert_not_contains "$exports/v2rayn-share.txt" 'insecure=1'
+  assert_contains "$exports/v2rayn-share.txt" 'type=tcp'
+  assert_contains "$exports/v2rayn-share.txt" 'headerType=none'
+  assert_contains "$exports/v2rayn-share.txt" 'insecure=0'
+  assert_contains "$exports/v2rayn-share.txt" 'allowInsecure=0'
   assert_contains "$exports/v2rayn-insecure-share.txt" 'insecure=1'
   assert_contains "$exports/v2rayn-insecure-share.txt" 'allowInsecure=1'
+  assert_contains "$exports/v2rayn-insecure-share.txt" 'type=tcp'
+  assert_contains "$exports/v2rayn-insecure-share.txt" 'headerType=none'
   assert_contains "$exports/sing-box-client.json" '"type": "anytls"'
   assert_contains "$exports/sing-box-client.json" '"alpn": ['
   assert_contains "$exports/sing-box-client.json" '"h2"'
@@ -57,8 +63,8 @@ assert_ipv6_share_uri() {
   exports="$fake/etc/anytls/exports"
   assert_file "$exports/share-link.txt"
   assert_contains "$exports/share-link.txt" 'anytls://test-password@[2001:db8::1]:9443'
-  assert_contains "$exports/share-link.txt" 'alpn=h2%2Chttp%2F1.1'
-  assert_contains "$exports/share-link.txt" 'fp=chrome'
+  assert_not_contains "$exports/share-link.txt" 'alpn='
+  assert_not_contains "$exports/share-link.txt" 'fp='
   assert_contains "$exports/share-link.txt" 'sni=2001%3Adb8%3A%3A1'
   assert_contains "$exports/subscription.txt" "sing-box-client: ${fake}/etc/anytls/exports/sing-box-client.json"
 

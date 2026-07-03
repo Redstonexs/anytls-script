@@ -15,6 +15,7 @@ run_happy() {
     --password $'test pass@word/1\tquoted"slash\\' \
     --port "9443" \
     --alpn "h2,http/1.1" \
+    --fingerprint "chrome" \
     --apply-swap \
     --rules block-cn,block-bt \
     --custom-rule-set openai \
@@ -46,6 +47,11 @@ run_happy() {
   assert_contains "$config" '"alpn": ['
   assert_contains "$config" '"h2"'
   assert_contains "$config" '"http/1.1"'
+  assert_contains "$config" '"dns": {'
+  assert_contains "$config" '"type": "local"'
+  assert_contains "$config" '"strategy": "ipv4_only"'
+  assert_contains "$config" '"domain_resolver": {'
+  assert_contains "$config" '"default_domain_resolver": "local"'
   assert_contains "$config" '"geoip-cn"'
   assert_contains "$config" '"geosite-geolocation-cn"'
   assert_contains "$config" '"geosite-bittorrent"'
@@ -91,6 +97,7 @@ PY
     --password "test-password" \
     --self-signed \
     --rules none \
+    --dns-strategy system \
     --no-color >"$out" 2>&1
 
   config="$fake/etc/sing-box/config.json"
@@ -98,7 +105,17 @@ PY
   assert_file "$config"
   assert_json_valid "$config"
   assert_contains "$config" '"listen_port": 443'
+  assert_not_contains "$config" '"dns": {'
+  assert_not_contains "$config" '"domain_resolver"'
+  assert_not_contains "$config" '"default_domain_resolver"'
+  assert_not_contains "$config" '"alpn": ['
   assert_contains "$exports/share-link.txt" 'anytls://test-password@203.0.113.10:443'
+  assert_not_contains "$exports/share-link.txt" 'alpn='
+  assert_not_contains "$exports/share-link.txt" 'fp='
+  assert_contains "$exports/v2rayn-share.txt" 'type=tcp'
+  assert_contains "$exports/v2rayn-share.txt" 'headerType=none'
+  assert_contains "$exports/v2rayn-share.txt" 'insecure=0'
+  assert_contains "$exports/v2rayn-share.txt" 'allowInsecure=0'
 
   rm -rf "$fake"
 
@@ -220,6 +237,25 @@ run_invalid() {
 
   [ "$status" -ne 0 ] || fail "invalid listen address should fail"
   assert_contains "$out" "Listen address must contain only"
+  assert_not_file "$fake/etc/sing-box/config.json"
+
+  rm -rf "$fake"
+
+  fake="$(make_fake_root)"
+  out="$fake/output.txt"
+  set +e
+  bash "$SCRIPT" \
+    --root "$fake" \
+    --yes \
+    --domain "203.0.113.10" \
+    --password "test-password" \
+    --dns-strategy invalid \
+    --no-color >"$out" 2>&1
+  status=$?
+  set -e
+
+  [ "$status" -ne 0 ] || fail "invalid DNS strategy should fail"
+  assert_contains "$out" "ANYTLS_DNS_STRATEGY must be"
   assert_not_file "$fake/etc/sing-box/config.json"
 
   rm -rf "$fake"

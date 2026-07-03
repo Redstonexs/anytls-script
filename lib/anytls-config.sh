@@ -88,6 +88,53 @@ EOF
   IFS="$old_ifs"
 }
 
+dns_config_json() {
+  if [ "$DNS_STRATEGY" = "system" ]; then
+    return
+  fi
+
+  local strategy_escaped
+  strategy_escaped="$(json_escape "$DNS_STRATEGY")"
+  cat <<EOF
+  "dns": {
+    "servers": [
+      {
+        "type": "local",
+        "tag": "local"
+      }
+    ],
+    "strategy": "${strategy_escaped}"
+  },
+EOF
+}
+
+direct_domain_resolver_json() {
+  if [ "$DNS_STRATEGY" = "system" ]; then
+    return
+  fi
+
+  local strategy_escaped
+  strategy_escaped="$(json_escape "$DNS_STRATEGY")"
+  cat <<EOF
+,
+      "domain_resolver": {
+        "server": "local",
+        "strategy": "${strategy_escaped}"
+      }
+EOF
+}
+
+route_default_domain_resolver_json() {
+  if [ "$DNS_STRATEGY" = "system" ]; then
+    return
+  fi
+
+  cat <<'EOF'
+,
+    "default_domain_resolver": "local"
+EOF
+}
+
 route_rules_json() {
   cat <<'EOF'
       {
@@ -190,6 +237,7 @@ write_sing_box_config() {
     "level": "info",
     "timestamp": true
   },
+$(dns_config_json)
   "inbounds": [
     {
       "type": "anytls",
@@ -213,7 +261,7 @@ write_sing_box_config() {
   "outbounds": [
     {
       "type": "direct",
-      "tag": "direct"
+      "tag": "direct"$(direct_domain_resolver_json)
     },
     {
       "type": "block",
@@ -231,7 +279,7 @@ $(route_rules_json)
     ],
     "rule_set": [
 $(route_rule_sets_json)
-    ]
+    ]$(route_default_domain_resolver_json)
   },
   "experimental": {
     "cache_file": {

@@ -61,6 +61,7 @@ Rules and exports
   Listen port: ${SERVER_PORT}
   Built-in blocks: geoip-cn, geosite-geolocation-cn, geosite-bittorrent, protocol=bittorrent
   Custom rule sets: ${CUSTOM_RULE_SETS:-none}
+  DNS strategy: ${DNS_STRATEGY}
   ALPN: ${ALPN:-none}
   Fingerprint: ${TLS_FINGERPRINT:-none}
   Export directory: $(exports_dir)

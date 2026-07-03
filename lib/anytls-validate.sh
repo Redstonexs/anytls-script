@@ -262,6 +262,16 @@ validate_custom_rule_records() {
   IFS="$old_ifs"
 }
 
+validate_dns_strategy() {
+  case "$DNS_STRATEGY" in
+    ipv4_only|prefer_ipv4|prefer_ipv6|ipv6_only|system)
+      ;;
+    *)
+      die "ANYTLS_DNS_STRATEGY must be 'ipv4_only', 'prefer_ipv4', 'prefer_ipv6', 'ipv6_only', or 'system'."
+      ;;
+  esac
+}
+
 validate_inputs() {
   validate_tls_mode
   validate_port
@@ -271,6 +281,7 @@ validate_inputs() {
   validate_listen_address "$LISTEN_ADDRESS"
   validate_alpn
   validate_fingerprint
+  validate_dns_strategy
   case "$INSTALL_RULE_PROFILE" in
     safe|none)
       ;;

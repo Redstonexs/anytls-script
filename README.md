@@ -37,6 +37,8 @@ curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/insta
 - 使用 root 权限执行，推荐命令里已经使用 `sudo bash`。
 - 防火墙和云厂商安全组放行 AnyTLS 端口，默认 TCP `443`。
 - 服务默认绑定 `0.0.0.0`，保证使用 A 记录的域名和 IPv4 客户端可连；如需只监听 IPv6，可传 `--listen ::` 或设置 `ANYTLS_LISTEN=::`。
+- 服务端直连出站默认使用 `ipv4_only` DNS 策略，避免 VPS IPv6 出站不可用时访问外站失败；如需系统默认解析，可传 `--dns-strategy system`。
+- 默认不强制写入 TLS ALPN 和 uTLS fingerprint；如需浏览器指纹伪装，可显式传 `--fingerprint chrome --alpn h2,http/1.1`。
 - DNS 已把 `--domain` 指向当前 VPS。
 - acme.sh standalone 签发期间需要 TCP `80` 可被公网访问，且没有其他程序占用。
 
@@ -64,6 +66,9 @@ curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/insta
 
 # 关闭内置阻断规则
 curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --rules none
+
+# 保留 sing-box/系统默认 DNS 出站策略
+curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --dns-strategy system
 
 # 添加自定义 geosite 规则
 curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/install.sh | sudo bash -s -- --domain your-domain.example --custom-rule-set openai
@@ -95,9 +100,11 @@ curl -fsSL https://raw.githubusercontent.com/Redstonexs/anytls-script/main/insta
 - 写入 BBR 和常用 TCP 调优配置。
 - 检测内存和 swap；未启用 swap 时给出建议，并生成一键应用脚本。
 - 默认安全规则：阻断 CN 方向出站规则集和 BitTorrent。
+- 默认服务端 direct 出站使用 `ipv4_only` 解析策略，可通过 `--dns-strategy` 调整。
+- 默认导出的 v2RayN 链接使用最小 TLS 参数，避免客户端在 TLS 握手阶段因为 ALPN 或 uTLS 指纹组合直接重置连接。
 - 支持自定义 geosite/rule_set 规则。
 - 导出 AnyTLS 分享链接、v2RayN 分享文本、Clash Verge YAML 和 sing-box 客户端 JSON。
-- v2RayN 分享链接默认带 `fp=chrome` 和 `alpn=h2,http/1.1`，导入后会自动填写 Fingerprint 和 ALPN。
+- 需要浏览器 TLS 指纹时，可通过 `--fingerprint chrome --alpn h2,http/1.1` 让分享链接带 Fingerprint 和 ALPN。
 
 ## 安装后文件
 
@@ -170,7 +177,7 @@ sudo ls -l /etc/anytls/exports
 常用文件：
 
 - `share-link.txt`：通用 `anytls://` 分享链接。
-- `v2rayn-share.txt`：给 v2RayN 导入的分享链接，默认包含 `fp=chrome` 和 `alpn=h2,http/1.1`。
+- `v2rayn-share.txt`：给 v2RayN 导入的分享链接，默认使用最小 TLS 参数，并显式包含 `type=tcp`、`headerType=none`、`insecure=0` 和 `allowInsecure=0`。
 - `v2rayn-insecure-share.txt`：给 v2RayN 诊断证书校验问题的兼容链接，会跳过证书验证；确认问题后应优先修客户端信任链。
 - `clash-verge.yaml`：给 Clash Verge Rev 使用的 YAML。
 - `sing-box-client.json`：sing-box 客户端 outbound 示例。
@@ -297,7 +304,7 @@ sudo bash anytls-install.sh --dry-run --domain your-domain.example --no-color
 - 如果 VPS 已有 swap，脚本不会创建新的 swap。
 - `install.sh` 默认会自动追加 `--yes`。需要交互确认时传 `--interactive`。
 - 不传 `--password` 时，脚本会优先复用 `/etc/anytls/password` 或现有 sing-box 配置中的密码；首次安装才会自动生成新密码。
-- 默认 ALPN 是 `h2,http/1.1`，默认 fingerprint 是 `chrome`；可通过 `--alpn` 和 `--fingerprint` 覆盖。
+- 默认 ALPN 和 fingerprint 为空；可通过 `--alpn` 和 `--fingerprint` 显式设置。
 - 默认监听地址是 `0.0.0.0`，避免域名只有 A 记录时服务端意外只接受 IPv6 连接；IPv6-only 场景请显式设置 `--listen ::`。
 
 ## 参考

@@ -3,7 +3,7 @@ export_profiles() {
   exports="$(exports_dir)"
   mkdir -p "$exports"
 
-  local link v2rayn_insecure_link password_encoded name_encoded host_encoded host_authority host_escaped name_escaped password_escaped
+  local link v2rayn_link v2rayn_insecure_link password_encoded name_encoded host_encoded host_authority host_escaped name_escaped password_escaped
   password_encoded="$(url_encode "$PASSWORD")"
   name_encoded="$(url_encode "$SERVER_NAME")"
   host_encoded="$(url_encode "$SERVER_HOST")"
@@ -12,7 +12,8 @@ export_profiles() {
   name_escaped="$(json_escape "$SERVER_NAME")"
   password_escaped="$(json_escape "$PASSWORD")"
   link="anytls://${password_encoded}@${host_authority}:${SERVER_PORT}?security=tls&sni=${host_encoded}$(fingerprint_query_param)$(alpn_query_param)#${name_encoded}"
-  v2rayn_insecure_link="anytls://${password_encoded}@${host_authority}:${SERVER_PORT}?security=tls&sni=${host_encoded}$(fingerprint_query_param)$(alpn_query_param)&insecure=1&allowInsecure=1#${name_encoded}"
+  v2rayn_link="anytls://${password_encoded}@${host_authority}:${SERVER_PORT}?security=tls&sni=${host_encoded}$(fingerprint_query_param)$(alpn_query_param)&type=tcp&headerType=none&insecure=0&allowInsecure=0#${name_encoded}"
+  v2rayn_insecure_link="anytls://${password_encoded}@${host_authority}:${SERVER_PORT}?security=tls&sni=${host_encoded}$(fingerprint_query_param)$(alpn_query_param)&type=tcp&headerType=none&insecure=1&allowInsecure=1#${name_encoded}"
 
   write_secret_file "$exports/share-link.txt" <<EOF
 ${link}
@@ -60,7 +61,7 @@ rules:
 EOF
 
   write_secret_file "$exports/v2rayn-share.txt" <<EOF
-${link}
+${v2rayn_link}
 EOF
 
   write_secret_file "$exports/v2rayn-insecure-share.txt" <<EOF
